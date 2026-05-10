@@ -7,7 +7,9 @@
       "Bash(git status*)",
       "Bash(git fetch*)",
       "Bash(git add*)",
-      "WebSearch"
+      "Bash(ln -sf*)",
+      "WebSearch",
+      "Read"
     ],
     "deny": [
       "Bash(npm*)",
