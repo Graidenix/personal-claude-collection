@@ -7,7 +7,7 @@ Personal Claude Code plugin — custom skills and slash commands, synced across 
 One command — no clone needed:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/personal-plugin/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/Graidenix/personal-claude-collection/main/install.sh | bash
 ```
 
 Clones the repo to `~/Developer/personal-plugin` and symlinks everything into `~/.claude/`. Restart Claude Code after.

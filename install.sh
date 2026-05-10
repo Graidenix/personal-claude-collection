@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="https://github.com/YOUR_USERNAME/personal-plugin.git"
+REPO_URL="https://github.com/Graidenix/personal-claude-collection.git"
 CLONE_DIR="${PERSONAL_PLUGIN_DIR:-$HOME/Developer/personal-plugin}"
 CLAUDE_DIR="$HOME/.claude"
 
