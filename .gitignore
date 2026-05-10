@@ -1,0 +1,11 @@
+# Claude Code — machine-specific settings (never commit)
+.claude/settings.local.json
+
+# Claude Code — auto-memory (personal conversation history)
+memory/
+
+# JetBrains IDE
+.idea/
+
+# macOS
+.DS_Store
