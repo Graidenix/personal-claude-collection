@@ -1,8 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_URL="https://github.com/YOUR_USERNAME/personal-plugin.git"
+CLONE_DIR="${PERSONAL_PLUGIN_DIR:-$HOME/Developer/personal-plugin}"
 CLAUDE_DIR="$HOME/.claude"
+
+# Detect curl-pipe mode: BASH_SOURCE[0] is not a real file on disk
+if [[ ! -f "${BASH_SOURCE[0]:-}" ]]; then
+  if [[ -d "$CLONE_DIR/.git" ]]; then
+    echo "Updating existing clone at $CLONE_DIR..."
+    git -C "$CLONE_DIR" pull --ff-only
+  else
+    echo "Cloning to $CLONE_DIR..."
+    git clone "$REPO_URL" "$CLONE_DIR"
+  fi
+  REPO_DIR="$CLONE_DIR"
+else
+  REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+fi
 
 mkdir -p "$CLAUDE_DIR/commands"
 mkdir -p "$CLAUDE_DIR/skills"

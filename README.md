@@ -4,21 +4,29 @@ Personal Claude Code plugin — custom skills and slash commands, synced across 
 
 ## Setup on a new machine
 
+One command — no clone needed:
+
 ```bash
-git clone <your-repo-url> ~/Developer/personal-plugin
-cd ~/Developer/personal-plugin
-chmod +x install.sh
-./install.sh
+curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/personal-plugin/main/install.sh | bash
 ```
 
-That's it. Restart Claude Code and your commands and skills will be available globally.
+Clones the repo to `~/Developer/personal-plugin` and symlinks everything into `~/.claude/`. Restart Claude Code after.
+
+> To clone elsewhere, set `PERSONAL_PLUGIN_DIR` before running:
+> ```bash
+> PERSONAL_PLUGIN_DIR=~/code/personal-plugin curl -sSL ... | bash
+> ```
 
 ## Updating
 
 ```bash
+# From the cloned repo:
 git pull
-# No reinstall needed — symlinks keep everything in sync automatically.
+
+# Or re-run the one-liner — it detects an existing clone and does git pull automatically.
 ```
+
+No reinstall needed after `git pull` — symlinks keep everything in sync.
 
 ## Uninstall
 
