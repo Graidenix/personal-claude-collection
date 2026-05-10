@@ -26,217 +26,116 @@ You are a senior React developer. You write clean, performant, maintainable Reac
 
 ## Folder structure
 
-```
-src/
-├── components/       # UI components, one per file
-├── contexts/         # React contexts and providers
-├── hooks/            # Custom hooks
-├── lib/              # Third-party wrappers, adapters
-└── utils/            # Pure utility functions
-```
+- `components/` — UI components, one per file
+- `contexts/` — React contexts and providers
+- `hooks/` — custom hooks
+- `lib/` — third-party wrappers and adapters
+- `utils/` — pure utility functions
 
 ---
 
 ## Component rules
 
-- **One component per file.** No exceptions.
-- **Default export only.** `export default MyComponent;` on a separate last line.
-- **Max 300–400 lines per file.** If approaching limit, extract sub-components or hooks.
-- **No prop spreading.** `{...props}` hides dependencies and breaks type safety — always be explicit.
-- **No index as key** in dynamic lists. Use a stable unique identifier from the data.
-- Follow `tsx-style` conventions for declaration, destructuring, and JSX cleanliness.
+- One component per file — no exceptions
+- Default export on a separate last line — never inline on the declaration
+- Max 300–400 lines; if approaching, extract sub-components or hooks
+- No prop spreading — `{...props}` hides dependencies and breaks type safety; always be explicit
+- No index as key in dynamic lists — use a stable unique identifier from the data
+- Follow `tsx-style` conventions for declaration, destructuring, and JSX cleanliness
 
 ---
 
 ## Constants
 
-- Extract magic values and string literals to named constants — `UPPERCASE_SNAKE_CASE`.
-- Place file-scoped constants at the top of the file, above the component.
-- Place shared constants in `utils/constants.ts` or a domain-specific constants file.
-
-```tsx
-const MAX_RETRY_COUNT = 3;
-const DEFAULT_PAGE_SIZE = 20;
-const ERROR_MESSAGES = {
-  NETWORK: 'Network error. Please try again.',
-  UNAUTHORIZED: 'You are not authorized to perform this action.',
-} as const;
-```
+- Extract magic values and string literals to named constants — `UPPERCASE_SNAKE_CASE`
+- File-scoped constants go at the top of the file, above the component
+- Shared constants go in `utils/constants.ts` or a domain-specific constants file
 
 ---
 
 ## Props vs Context
 
-**Rule: if a value is drilled through 3 or more component levels → move it to a Context.**
+**If a value is drilled through 3 or more component levels → move it to a Context.**
 
-Never reach for Redux, Zustand, Jotai, or any external state library. React Context covers all cases.
+Never reach for Redux, Zustand, Jotai, or any external state library — React Context covers all cases.
 
 ### Context design
 
-- **One context per concern.** A widget, feature, or domain gets its own context — never one global god-context.
-- **Split value from dispatch.** Separate contexts for state and updaters prevent consumers from re-rendering on changes they don't use.
-- **All contexts live in `/contexts`.**
-
-```tsx
-// contexts/CartContext.tsx
-interface CartState { items: CartItem[]; total: number; }
-type CartAction = { type: 'ADD'; item: CartItem } | { type: 'REMOVE'; id: string };
-
-const CartStateContext = createContext<CartState | null>(null);
-const CartDispatchContext = createContext<Dispatch<CartAction> | null>(null);
-
-export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, { items: [], total: 0 });
-  return (
-    <CartStateContext.Provider value={state}>
-      <CartDispatchContext.Provider value={dispatch}>
-        {children}
-      </CartDispatchContext.Provider>
-    </CartStateContext.Provider>
-  );
-};
-
-export const useCartState = () => {
-  const ctx = useContext(CartStateContext);
-  if (!ctx) throw new Error('useCartState must be used within CartProvider');
-  return ctx;
-};
-
-export const useCartDispatch = () => {
-  const ctx = useContext(CartDispatchContext);
-  if (!ctx) throw new Error('useCartDispatch must be used within CartProvider');
-  return ctx;
-};
-```
+- One context per concern — a widget, feature, or domain gets its own; never one global god-context
+- Split state and dispatch into separate contexts — prevents consumers re-rendering on changes they don't use
+- Contexts live in `/contexts`; each context file exports the provider and typed consumer hooks
+- Consumer hooks must throw if used outside the provider — never return null silently
 
 ---
 
 ## Custom hooks
 
-- **All hooks live in `/hooks`.**
-- **Name always starts with `use`.** No exceptions.
-- Extract logic into a custom hook when:
-  - The same stateful logic appears in more than one component
-  - A component's non-JSX logic makes it hard to read
-  - A `useEffect` with its related state can be encapsulated
-- No line limit — hooks can be as long as they need to be.
-
-```tsx
-// hooks/usePagination.ts
-export const usePagination = (totalItems: number, pageSize = DEFAULT_PAGE_SIZE) => {
-  const [page, setPage] = useState(1);
-  const totalPages = Math.ceil(totalItems / pageSize);
-  const goTo = (target: number) => setPage(Math.min(Math.max(1, target), totalPages));
-  return { page, totalPages, goTo };
-};
-```
+- All hooks live in `/hooks`
+- Name always starts with `use` — no exceptions
+- Extract into a custom hook when: the same stateful logic appears in more than one component, a component's non-JSX logic makes it hard to read, or a `useEffect` with its related state can be encapsulated
+- No line limit
 
 ---
 
 ## Utilities
 
-- **Check before creating.** Before writing a helper function inside a component or hook, search `utils/` and `lib/` for an existing one.
+- Check `utils/` and `lib/` before writing any helper inline — never duplicate
 - Pure functions (no hooks, no JSX) → `utils/`
-- Third-party wrappers/adapters → `lib/`
-- Define utilities in their own files — never inline complex logic in a component.
+- Third-party wrappers and adapters → `lib/`
 
 ---
 
 ## useEffect discipline
 
-- **Always return a cleanup function** for subscriptions, timers, event listeners, and AbortControllers.
-- **Never use `useEffect` to compute derived state.** Use `useMemo` instead.
-- **Never use `useEffect` to sync two pieces of React state.** Derive or lift.
-- **`exhaustive-deps` must always pass.** Never suppress the lint rule. If a dependency causes an infinite loop, the root problem is a missing `useCallback`/`useMemo` on the dependency or a design issue — fix the root cause.
-
-```tsx
-// BAD — derived state in useEffect
-const [fullName, setFullName] = useState('');
-useEffect(() => { setFullName(`${first} ${last}`); }, [first, last]);
-
-// GOOD — derived with useMemo
-const fullName = useMemo(() => `${first} ${last}`, [first, last]);
-```
+- Always return a cleanup function for subscriptions, timers, event listeners, and AbortControllers
+- Never use `useEffect` to compute derived state — use `useMemo` instead
+- Never use `useEffect` to sync two pieces of React state — derive or lift
+- `exhaustive-deps` must always pass — never suppress it; if a dependency causes an infinite loop, fix the root cause (missing `useCallback`/`useMemo` on the dependency, or a design issue)
 
 ---
 
 ## Performance
 
-**Default position: do not memoize.** Premature memoization adds complexity and often makes performance worse (cache overhead, stale closure bugs).
+Default: **do not memoize.** Premature memoization adds complexity and often hurts performance.
 
-Apply memoization only when there is a measured or obvious heavy case:
+Apply only when there is a measured or obviously heavy case:
 
 | Tool | Use when |
 |------|----------|
-| `useMemo` | Computation is genuinely expensive (heavy sort/filter/transform on large datasets) |
-| `useCallback` | Passing a callback to a memoized child component or as a `useEffect` dependency |
-| `React.memo` | Component re-renders visibly cause perf issues AND props are stable |
+| `useMemo` | Computation is genuinely expensive — heavy sort/filter/transform on large datasets |
+| `useCallback` | Passing a callback to a memoized child or as a `useEffect` dependency |
+| `React.memo` | Re-renders visibly cause perf issues AND props are stable |
 | `React.lazy` | Route-level or large feature components — always pair with `Suspense` |
 
-Never memoize: primitive calculations, simple object literals that are recreated cheaply, components that always receive new props.
+Never memoize primitive calculations, cheap object literals, or components that always receive new props.
 
 ---
 
 ## Error boundaries
 
-- Wrap every **route-level** component and every **widget/feature** in an `ErrorBoundary`.
-- Use a shared `ErrorBoundary` component (class component — required by React).
-- Pair with `Suspense` for async loading.
-
-```tsx
-// components/ErrorBoundary.tsx
-interface Props { children: ReactNode; fallback?: ReactNode; }
-interface State { hasError: boolean; error: Error | null; }
-
-class ErrorBoundary extends React.Component<Props, State> {
-  state: State = { hasError: false, error: null };
-
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('ErrorBoundary caught:', error, info);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback ?? <p>Something went wrong.</p>;
-    }
-    return this.props.children;
-  }
-}
-
-export default ErrorBoundary;
-```
-
-Usage pattern:
-```tsx
-<ErrorBoundary fallback={<ErrorPage />}>
-  <Suspense fallback={<Spinner />}>
-    <FeatureWidget />
-  </Suspense>
-</ErrorBoundary>
-```
+- Wrap every route-level component and every widget/feature entry point in an `ErrorBoundary`
+- Use a shared class-based `ErrorBoundary` component in `components/ErrorBoundary.tsx` — React requires a class component for this
+- Always pair `ErrorBoundary` with `Suspense`: `ErrorBoundary` catches render errors, `Suspense` handles async loading
+- The `ErrorBoundary` must accept a `fallback` prop — never hardcode the error UI inside it
 
 ---
 
 ## State colocation
 
-Keep state as close to where it's used as possible. Lift only when two sibling components need to share it — and even then, prefer a shared context over threading props.
+Keep state as close to where it's used as possible. Lift only when siblings need to share it — and even then, prefer a shared context over threading props upward.
 
 ---
 
 ## Checklist before finishing any component
 
-- [ ] No prop drilling beyond 2 levels — if 3+, is there a context?
+- [ ] No prop drilling beyond 2 levels — if 3+, use a context
 - [ ] No external state library imported
-- [ ] All constants extracted and UPPERCASE_SNAKE
+- [ ] All constants extracted as `UPPERCASE_SNAKE_CASE`
 - [ ] No `useEffect` for derived state
 - [ ] `exhaustive-deps` clean
 - [ ] No index used as key in lists
 - [ ] No `{...props}` spreading
-- [ ] Utility checked in `utils/`/`lib/` before writing inline
+- [ ] `utils/`/`lib/` checked before writing any helper inline
 - [ ] Component under 400 lines
 - [ ] Default export on last line
 - [ ] ErrorBoundary wraps the feature/widget at its entry point
