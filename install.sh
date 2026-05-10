@@ -9,6 +9,14 @@ mkdir -p "$CLAUDE_DIR/skills"
 
 linked=0
 
+if [[ -e "$CLAUDE_DIR/CLAUDE.md" && ! -L "$CLAUDE_DIR/CLAUDE.md" ]]; then
+  echo "  warning: ~/.claude/CLAUDE.md exists and is not a symlink — skipping global rules (back it up and remove it to let install manage it)"
+else
+  ln -sf "$REPO_DIR/rules/GLOBAL.md" "$CLAUDE_DIR/CLAUDE.md"
+  echo "  linked global rules: CLAUDE.md"
+  ((linked++)) || true
+fi
+
 for cmd in "$REPO_DIR/.claude/commands"/*.md; do
   [[ -f "$cmd" ]] || continue
   name="$(basename "$cmd")"

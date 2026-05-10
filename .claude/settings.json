@@ -1,7 +1,22 @@
 {
   "permissions": {
-    "allow": [],
-    "deny": []
+    "allow": [
+      "Bash(bun run*)",
+      "Bash(bun add*)",
+      "Bash(git diff*)",
+      "Bash(git status*)",
+      "Bash(git fetch*)",
+      "Bash(git add*)",
+      "WebSearch"
+    ],
+    "deny": [
+      "Bash(npm*)",
+      "Bash(npx*)",
+      "Bash(pip*)",
+      "Bash(python*)",
+      "Bash(git commit*)",
+      "Bash(git pull*)"
+    ]
   },
   "hooks": {}
 }

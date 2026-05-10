@@ -6,6 +6,12 @@ CLAUDE_DIR="$HOME/.claude"
 
 removed=0
 
+if [[ -L "$CLAUDE_DIR/CLAUDE.md" ]]; then
+  rm "$CLAUDE_DIR/CLAUDE.md"
+  echo "  removed global rules: CLAUDE.md"
+  ((removed++)) || true
+fi
+
 for cmd in "$REPO_DIR/.claude/commands"/*.md; do
   [[ -f "$cmd" ]] || continue
   link="$CLAUDE_DIR/commands/$(basename "$cmd")"
